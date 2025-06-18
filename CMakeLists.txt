@@ -5,10 +5,12 @@ project (main LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SOURCES
-	main.cpp
-)
 find_package(SDL3 CONFIG REQUIRED)
+
+file(GLOB SOURCES 
+	"src/*.cpp"
+	"main.cpp"
+)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
@@ -17,5 +19,8 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(main 
 	PRIVATE
 		${PROJECT_SOURCE_DIR}/rsrc
+		${PROJECT_SOURCE_DIR}/src
 		${PROJECT_SOURCE_DIR}
 )
+
+
