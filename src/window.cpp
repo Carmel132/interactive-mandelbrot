@@ -15,6 +15,9 @@ void Window::init() {
         throw SDLException("Failed to create window");
     }
 
+    poll_window_coordinates();
+    SDL_GetMouseState(&m_mouse_pos.x, &m_mouse_pos.y);
+
     m_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
     if (m_device == nullptr) {
         throw SDLException("Failed to create GPU device");
@@ -26,6 +29,10 @@ void Window::init() {
     if (!SDL_ClaimWindowForGPUDevice(m_device, m_win)) {
         throw SDLException("Failed to bind GPU device to window");
     }
+}
+
+void Window::poll_window_coordinates(){
+    SDL_GetWindowSize(m_win, &m_window_size.x, &m_window_size.y);
 }
 
 void Window::run() {
@@ -41,6 +48,8 @@ void Window::run() {
     bool quit = false;
     SDL_Event event;
     while (!quit) {
+        
+
         // Event
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
@@ -50,12 +59,22 @@ void Window::run() {
                 quit = true;
             }
             else if (event.type == SDL_EVENT_MOUSE_WHEEL) {
-                float m_x, m_y;
-                int w_x, w_y;
-                SDL_GetWindowSize(m_win, &w_x, &w_y);
-                SDL_GetMouseState(&m_x, &m_y);
-                std::cout << "Num zooms: " << m_view.num_zooms << "\n";
-                m_view.zoomAboutPoint(m_view.fromScreenCoord(m_x, m_y, w_x, w_y), (double)event.wheel.y > 0);
+                m_view.zoomAboutPoint(m_view.fromScreenCoord((int)m_mouse_pos.x, (int)m_mouse_pos.y, m_window_size.x, m_window_size.y), event.wheel.y > 0);
+            }
+            else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+                poll_window_coordinates();
+            }
+            else if (event.type == SDL_EVENT_MOUSE_MOTION) {
+                m_mouse_pos.x = event.motion.x;
+                m_mouse_pos.y = event.motion.y;
+
+                m_pan.on_mouse_motion();
+            }
+            else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+                m_pan.on_mouse_down();
+            }
+            else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+                m_pan.on_mouse_up();
             }
         }
 
@@ -89,8 +108,4 @@ void Window::run() {
     SDL_DestroyWindow(m_win);
     SDL_DestroyGPUDevice(m_device);
     SDL_Quit();
-}
-
-Window::~Window() {
-
 }
