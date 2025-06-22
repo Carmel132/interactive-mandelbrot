@@ -113,18 +113,10 @@ struct Pipeline {
 
 };
 
-// creates a [SDL_GPUBuffer*] pointing to the storage buffer
-// performs a copy pass and uploads colormap data to the fragment storage buffer
-// this needs to be bound to the command buffer BEFORE each draw call
-inline auto upload_colormap_to_fragment_storage_buffer(SDL_GPUDevice* device) -> SDL_GPUBuffer* {
+
+// Sends colormap chain data to given storage buffer through a copy pass.
+inline void upload_colormap_to_storage_buffer(SDL_GPUBuffer* storage_buffer, SDL_GPUDevice* device, const ColormapChain& colormap_chain) {
     using _PaddedVec3 = _NormalizedColorF;
-
-    SDL_GPUBufferCreateInfo buffer_create_info = {
-        .usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
-        .size = sizeof(COLORMAP)
-    };
-
-    SDL_GPUBuffer *storage_buffer = SDL_CreateGPUBuffer(device, &buffer_create_info);
 
     SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(device);
 
@@ -132,14 +124,14 @@ inline auto upload_colormap_to_fragment_storage_buffer(SDL_GPUDevice* device) ->
 
     SDL_GPUTransferBufferCreateInfo transfer_buffer_create_info = {
         .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
-        .size = sizeof(COLORMAP)
+        .size = COLORMAP_SIZE
     };
     
     SDL_GPUTransferBuffer* transfer_buffer = SDL_CreateGPUTransferBuffer(device, &transfer_buffer_create_info);
     
     auto* transfer_data = (_PaddedVec3*)SDL_MapGPUTransferBuffer(device, transfer_buffer, false);
-    for (int i = 0; i < sizeof(COLORMAP) / sizeof(_PaddedVec3); i++) {
-        transfer_data[i] = magma[i];
+    for (int i = 0; i < COLORMAP_SIZE / sizeof(_PaddedVec3); i++) {
+        transfer_data[i] = colormap_chain.get()[i];
     }
     SDL_UnmapGPUTransferBuffer(device, transfer_buffer);
 
@@ -151,18 +143,32 @@ inline auto upload_colormap_to_fragment_storage_buffer(SDL_GPUDevice* device) ->
     SDL_GPUBufferRegion buffer_region = {
         .buffer = storage_buffer,
         .offset = 0,
-        .size = sizeof(COLORMAP)
+        .size = COLORMAP_SIZE
     };
 
     SDL_UploadToGPUBuffer(copy_pass, &transfer_buffer_location, &buffer_region, false);
     SDL_EndGPUCopyPass(copy_pass);
     SDL_SubmitGPUCommandBuffer(cmd_buf);
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
+}
+
+// creates a [SDL_GPUBuffer*] pointing to the storage buffer
+// performs a copy pass and uploads colormap data to the fragment storage buffer
+// this needs to be bound to the command buffer BEFORE each draw call
+inline auto create_and_upload_to_fragment_storage_buffer(SDL_GPUDevice* device, const ColormapChain& colormap_chain) -> SDL_GPUBuffer* {
+    using _PaddedVec3 = _NormalizedColorF;
+
+    SDL_GPUBufferCreateInfo buffer_create_info = {
+        .usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
+        .size = COLORMAP_SIZE
+    };
+
+    SDL_GPUBuffer *storage_buffer = SDL_CreateGPUBuffer(device, &buffer_create_info);
+
+    upload_colormap_to_storage_buffer(storage_buffer, device, colormap_chain);
 
     return storage_buffer;
 }
-
-
 
 // formats and uploads uniform data to fragment shader
 inline void push_fragment_shader_uniforms(SDL_GPUCommandBuffer* cmd_buf, int window_width, int window_height, const Viewport& view) {
@@ -173,7 +179,7 @@ inline void push_fragment_shader_uniforms(SDL_GPUCommandBuffer* cmd_buf, int win
     struct _Viewport {
         double ox, oy, w, r;
     };
-    
+
     struct _UResolution {
         float x, y;
         float _pad[2];

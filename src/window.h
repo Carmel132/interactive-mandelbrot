@@ -14,6 +14,10 @@ struct Window {
     Vec2<int> m_window_size;
     Vec2<float> m_mouse_pos;
     Pan m_pan;
+    
+    bool update_colormap_data;
+    ColormapChain m_colormap_chain;
+    
 
     void start();
     void init();
@@ -21,6 +25,6 @@ struct Window {
 
     void poll_window_coordinates();
 
-    Window() : m_view{4.3, 9.0/16.0, {-2.4, 1.2}}, m_pan{&m_mouse_pos, &m_view, &m_window_size} {};
+    Window() : m_view{4.3, 9.0/16.0, {-2.4, 1.2}}, m_pan{&m_mouse_pos, &m_view, &m_window_size}, update_colormap_data{false}, m_colormap_chain{&update_colormap_data} {};
     ~Window() = default;
 };

@@ -43,13 +43,11 @@ void Window::run() {
     Pipeline pipeline{m_device, shaders, SDL_GetGPUSwapchainTextureFormat(m_device, m_win)};
     shaders.free(m_device);
 
-    SDL_GPUBuffer* storage_buffer = upload_colormap_to_fragment_storage_buffer(m_device);
+    SDL_GPUBuffer* storage_buffer = create_and_upload_to_fragment_storage_buffer(m_device, m_colormap_chain);
 
     bool quit = false;
     SDL_Event event;
     while (!quit) {
-        
-
         // Event
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
@@ -77,6 +75,9 @@ void Window::run() {
             else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
                 m_pan.on_mouse_up();
             }
+            else if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_SPACE) {
+                m_colormap_chain.next();
+            }
         }
 
         m_pan.frame();
@@ -86,6 +87,10 @@ void Window::run() {
         if (cmd_buf == nullptr) {
             throw SDLException("Failed to acquire command buffer");
             break;
+        }
+
+        if (update_colormap_data) {
+            upload_colormap_to_storage_buffer(storage_buffer, m_device, m_colormap_chain);
         }
 
         push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
