@@ -272,6 +272,6 @@ constexpr Color fromColormap(uint16_t i, uint16_t max) {
 
     auto _i = (int)((float)i / max * (255));
     _NormalizedColorF colorf = magma[_i];
-    Color color  = {(uint8_t)(colorf.r * 255), (uint8_t)(colorf.g * 255), (uint8_t)(colorf.g * 255)};
+    Color color  = {(uint8_t)(colorf.r * 255), (uint8_t)(colorf.g * 255), (uint8_t)(colorf.b * 255)};
     return color;
 }
