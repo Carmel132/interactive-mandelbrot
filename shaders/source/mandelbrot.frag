@@ -1,5 +1,12 @@
 #version 450
 
+const double a = -73.64196;
+const float b = 975;
+const int c = 25;
+int iter_map(double w) {
+    return int(b * exp(float(w * a))) + c;
+}
+
 layout (set = 3, binding = 0) uniform Viewport {
     dvec2 offset;
     double width;
@@ -16,7 +23,7 @@ layout (set = 2, binding = 0) readonly buffer ColorMap {
 
 layout (location = 0) out vec4 FragColor;
 
-int ITER_COUNT = 2000;
+int ITER_COUNT = iter_map(view.width);
 const double BREAKOUT = 4.;
 
 vec3 fromColormap(int i) {

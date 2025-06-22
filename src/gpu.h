@@ -162,21 +162,38 @@ inline auto upload_colormap_to_fragment_storage_buffer(SDL_GPUDevice* device) ->
     return storage_buffer;
 }
 
+struct _Vec2 {
+    float x, y;
+};
+
+struct _Viewport {
+        double ox, oy, w, r;
+};
+struct _UResolution {
+    float x, y;
+    float _pad[2];
+};
+
+
+inline auto _double_to_double_float(double d) -> _Vec2 {
+        float hi = static_cast<float>(d);
+    
+        // Calculate the residual (low part)
+        double diff = d - static_cast<double>(hi);
+        
+        float lo = static_cast<float>(diff);
+        
+        return { hi, lo };
+    };
+
 // formats and uploads uniform data to fragment shader
 inline void push_fragment_shader_uniforms(SDL_GPUCommandBuffer* cmd_buf, int window_width, int window_height, const Viewport& view) {
-    struct _Viewport {
-        float ox, oy, w, r;
-    } view_data;
-    struct _Vec2 {
-        float x, y;
-    } window_size ;
-
-    window_size = _Vec2{(float)window_width, (float)window_height};
-    view_data = _Viewport{
-        (float)view.m_offset.x,
-        (float)view.m_offset.y,
-        (float)view.m_width,
-        (float)window_height / window_width
+    _UResolution window_size = {(float)window_width, (float)window_height};
+    _Viewport view_data = _Viewport{
+        ((double)view.m_offset.x),
+        ((double)view.m_offset.y),
+        ((double)view.m_width),
+        ((double)window_height / window_width)
     };
 
     SDL_PushGPUFragmentUniformData(cmd_buf, 0, &view_data, sizeof(view_data));

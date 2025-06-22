@@ -66,7 +66,7 @@ void Window::run() {
                 int w_x, w_y;
                 SDL_GetWindowSize(m_win, &w_x, &w_y);
                 SDL_GetMouseState(&m_x, &m_y);
-                std::cout << m_x << ", " << m_y << "\n";
+                std::cout << "Num zooms: " << m_view.num_zooms << "\n";
                 m_view.zoomAboutPoint(m_view.fromScreenCoord(m_x, m_y, w_x, w_y), (double)event.wheel.y > 0);
             }
         }
