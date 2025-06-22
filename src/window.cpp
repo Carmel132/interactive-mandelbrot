@@ -48,6 +48,8 @@ void Window::run() {
     bool quit = false;
     SDL_Event event;
     while (!quit) {
+        
+
         // Event
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
@@ -65,6 +67,14 @@ void Window::run() {
             else if (event.type == SDL_EVENT_MOUSE_MOTION) {
                 m_mouse_pos.x = event.motion.x;
                 m_mouse_pos.y = event.motion.y;
+
+                m_pan.on_mouse_motion();
+            }
+            else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+                m_pan.on_mouse_down();
+            }
+            else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+                m_pan.on_mouse_up();
             }
         }
 
