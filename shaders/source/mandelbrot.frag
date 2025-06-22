@@ -1,9 +1,16 @@
 #version 450
 
+const double a = -73.64196;
+const float b = 975;
+const int c = 25;
+int iter_map(double w) {
+    return int(b * exp(float(w * a))) + c;
+}
+
 layout (set = 3, binding = 0) uniform Viewport {
-    vec2 offset;
-    float width;
-    float ratio;
+    dvec2 offset;
+    double width;
+    double ratio;
 } view;
 
 layout(set = 3, binding = 1) uniform UResolution {
@@ -16,8 +23,8 @@ layout (set = 2, binding = 0) readonly buffer ColorMap {
 
 layout (location = 0) out vec4 FragColor;
 
-const int ITER_COUNT = 25;
-const float BREAKOUT = 4.;
+int ITER_COUNT = iter_map(view.width);
+const double BREAKOUT = 4.;
 
 vec3 fromColormap(int i) {
     int idx = i / ITER_COUNT * 256;
@@ -26,16 +33,16 @@ vec3 fromColormap(int i) {
 
 void main() {
     vec3 color;
-    vec2 pos = gl_FragCoord.xy;
-    vec2 point = vec2 (
+    dvec2 pos = gl_FragCoord.xy;
+    dvec2 point = dvec2 (
         pos.x / uResolution.u_resolution.x * view.width + view.offset.x,
         pos.y / uResolution.u_resolution.y * view.width * view.ratio - view.offset.y
     );
-    vec2 z = point;
+    dvec2 z = point;
     int i;
     for(i = 0; i < ITER_COUNT; ++i) {
         if (dot(z, z) >= BREAKOUT * BREAKOUT) break;
-        z = vec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + point;
+        z = dvec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + point;
     }
     float t = float(i) / float(ITER_COUNT);
     color = colors.colors[int(t * 255)];

@@ -54,3 +54,8 @@ struct Vec2 {
         return os << '(' << v.x <<", " << v.y << ')';
     }
 };
+
+template <typename T>
+inline Vec2<T> lerp(float t, const Vec2<T>& v1, const Vec2<T>& v2) {
+    return v1 * (T)(1-t) + v2;
+}

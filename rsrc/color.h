@@ -1,12 +1,18 @@
 #pragma once
 #include <cstdlib>
 #include <iostream>
+
+#ifndef COLORMAP
+#define COLORMAP magma
+#endif
+
 struct Color {
     uint8_t r, g, b;
 };
 
 struct _NormalizedColorF {
     float r,g,b;
+    float __w = 0; // Padding for std140 storage buffer
 };
 
 constexpr _NormalizedColorF magma[256] = {

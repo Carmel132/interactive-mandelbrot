@@ -1,11 +1,6 @@
-#include <iostream>
-#include <src/window.h>
-#include <rsrc/viewport.h>
-int main(int argc, char** argv) {
-    std::cout << "Hello world!\n";
-    
 
-    
+#include <src/window.h>
+auto main(int argc, char** argv) -> int {
     Window w{};
 
     w.run();
