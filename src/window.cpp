@@ -28,18 +28,6 @@ void Window::init() {
     }
 }
 
-// TODO: Store mandelbrot, to prevent recomputing same data. Store it as {breakout idx : [pts]}
-// void Window::render() const {
-//     for (int x = 0; x < SCREEN_WIDTH_START_PX; x++) {
-//         for (int y = 0; y < SCREEN_HEIGHT_START_PX; y++) {
-
-//             Color color = mandelbrot_eval(m_view.fromScreenCoord(x, y, SCREEN_WIDTH_START_PX, SCREEN_HEIGHT_START_PX));
-//             SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, 255);
-//             SDL_RenderPoint(m_renderer, x, y);
-//         } 
-//     }
-// }
-
 void Window::run() {
     // ensures [init()] has been called
     if (m_win == nullptr) {init();}
