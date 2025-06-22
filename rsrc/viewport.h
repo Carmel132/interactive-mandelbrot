@@ -10,9 +10,7 @@ struct Viewport {
     // the ration of height to width
     long double m_ratio;
     // offset in absolute coordinates
-    Vec2<long double> m_offset;
-    int num_zooms = 0;
-    
+    Vec2<long double> m_offset;    
 
     inline Vec2<long double> fromScreenCoord(int x, int y, int w, int h) const {
         long double ret_width = m_width * x / w;
@@ -22,8 +20,7 @@ struct Viewport {
 
     // one tick = a 5th
     inline void zoomAboutPoint(Vec2<long double> point, bool zoom_in) {
-        double factor = zoom_in ? ZOOM_RATE : 2-ZOOM_RATE;
-        if (zoom_in) {num_zooms++;}
+        double factor = zoom_in ? ZOOM_RATE : 1+ZOOM_RATE;
 
         m_width *= factor;
         m_offset = point + (m_offset - point) * factor;;

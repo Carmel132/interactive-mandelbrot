@@ -2,7 +2,10 @@
 #include <iostream>
 #include <concepts>
 
-template<typename T> requires std::floating_point<T>
+template <typename T> 
+concept _Number = std::floating_point<T> or std::integral<T>;
+
+template<typename T> requires _Number<T>
 struct Vec2 {
     T x, y;
     Vec2(T _x, T _y) : x{ _x }, y{ _y } {}
