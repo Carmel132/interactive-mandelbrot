@@ -60,6 +60,7 @@ void Window::run() {
             }
             else if (event.type == SDL_EVENT_MOUSE_WHEEL) {
                 m_view.zoomAboutPoint(m_view.fromScreenCoord((int)m_mouse_pos.x, (int)m_mouse_pos.y, m_window_size.x, m_window_size.y), event.wheel.y > 0);
+                m_pan.on_zoom();
             }
             else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
                 poll_window_coordinates();
@@ -78,6 +79,8 @@ void Window::run() {
             }
         }
 
+        m_pan.frame();
+
         SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(m_device);
 
         if (cmd_buf == nullptr) {
@@ -85,12 +88,7 @@ void Window::run() {
             break;
         }
 
-        int window_width;
-        int window_height;
-
-        SDL_GetWindowSize(m_win, &window_width, &window_height);
-
-        push_fragment_shader_uniforms(cmd_buf, window_width, window_height, m_view);
+        push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
 
         SDL_GPURenderPass* render_pass = start_render_pass(cmd_buf, get_swapchain_texture(cmd_buf, m_win));
 

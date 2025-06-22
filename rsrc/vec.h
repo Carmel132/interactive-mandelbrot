@@ -52,13 +52,13 @@ struct Vec2 {
     Vec2 reflectOrigin() const {
         return { -y, x };
     }
-
+    
     friend std::ostream& operator<<(std::ostream& os, Vec2 const& v) {
         return os << '(' << v.x <<", " << v.y << ')';
     }
 };
 
 template <typename T>
-inline Vec2<T> lerp(float t, const Vec2<T>& v1, const Vec2<T>& v2) {
-    return v1 * (T)(1-t) + v2;
+inline Vec2<T> lerp(long double t, const Vec2<T>& v1, const Vec2<T>& v2) {
+    return v1 * (1-t) + v2*t;
 }
