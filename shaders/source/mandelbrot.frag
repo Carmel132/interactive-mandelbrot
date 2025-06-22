@@ -16,8 +16,8 @@ layout (set = 2, binding = 0) readonly buffer ColorMap {
 
 layout (location = 0) out vec4 FragColor;
 
-const int ITER_COUNT = 25;
-const float BREAKOUT = 4.;
+const int ITER_COUNT = 1000;
+const float BREAKOUT = 20.;
 
 vec3 fromColormap(int i) {
     int idx = i / ITER_COUNT * 256;
