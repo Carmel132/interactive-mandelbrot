@@ -118,8 +118,7 @@ void Window::run() {
         SDL_BindGPUGraphicsPipeline(render_pass, pipeline.pipeline);
 
         end_render_pass(cmd_buf, render_pass);
-
-
+        update_screen_data = false;
     }
 
     pipeline.free(m_device);

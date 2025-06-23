@@ -18,6 +18,7 @@ struct Window {
     bool update_colormap_data;
     ColormapChainChain m_colormap_chain;
     
+    bool update_screen_data;
 
     void start();
     void init();
@@ -25,6 +26,6 @@ struct Window {
 
     void poll_window_coordinates();
 
-    Window() : m_view{4.3, 9.0/16.0, {-2.4, 1.2}}, m_pan{&m_mouse_pos, &m_view, &m_window_size}, update_colormap_data{false},  m_colormap_chain{buildColormapChain(&update_colormap_data)} {};
+    Window() : m_view{4.3, 9.0/16.0, {-2.4, 1.2}, &update_screen_data}, m_pan{&m_mouse_pos, &m_view, &m_window_size, &update_screen_data}, update_colormap_data{false},  m_colormap_chain{buildColormapChain(&update_colormap_data)}, update_screen_data{false} {};
     ~Window() = default;
 };
