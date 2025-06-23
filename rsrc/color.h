@@ -4,13 +4,11 @@
 #include <rsrc/colormaps.h>
 
 #define COLORMAP_SIZE sizeof(magma)
-#define COLORMAP_CHAIN_NUM 1
+#define COLORMAP_CHAIN_SET_SIZE 7
 
 struct Color {
     uint8_t r, g, b;
 };
-
-
 
 struct ColormapSet {
     int size;
@@ -110,7 +108,6 @@ constexpr ColormapChain colormap_chain_misc {
     }
 };
 
-
 struct ColormapChainSet {
     int size;
     ColormapChain * chains;
@@ -143,8 +140,6 @@ struct ColormapChainChain {
         return set.chains[idx];
     }
 };
-
-#define COLORMAP_CHAIN_SET_SIZE 7
 
 inline ColormapChainChain buildColormapChain(bool* update_colomap_chain) {
     static ColormapChain colormap_chains[COLORMAP_CHAIN_SET_SIZE] = {

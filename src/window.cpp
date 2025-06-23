@@ -106,6 +106,7 @@ void Window::run() {
 
         if (update_colormap_data) {
             upload_colormap_to_storage_buffer(storage_buffer, m_device, m_colormap_chain.get());
+            update_colormap_data = false;
         }
 
         push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
@@ -117,6 +118,8 @@ void Window::run() {
         SDL_BindGPUGraphicsPipeline(render_pass, pipeline.pipeline);
 
         end_render_pass(cmd_buf, render_pass);
+
+
     }
 
     pipeline.free(m_device);
