@@ -43,7 +43,7 @@ void Window::run() {
     Pipeline pipeline{m_device, shaders, SDL_GetGPUSwapchainTextureFormat(m_device, m_win)};
     shaders.free(m_device);
 
-    SDL_GPUBuffer* storage_buffer = create_and_upload_to_fragment_storage_buffer(m_device, m_colormap_chain);
+    SDL_GPUBuffer* storage_buffer = create_and_upload_to_fragment_storage_buffer(m_device, m_colormap_chain.get());
 
     bool quit = false;
     SDL_Event event;
@@ -75,8 +75,23 @@ void Window::run() {
             else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
                 m_pan.on_mouse_up();
             }
-            else if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_SPACE) {
-                m_colormap_chain.next();
+            else if (event.type == SDL_EVENT_KEY_DOWN) {
+                switch (event.key.key) {
+                    case SDLK_RIGHT:
+                        m_colormap_chain.next();
+                        break;
+                    case SDLK_UP:
+                        m_colormap_chain.next_chain();
+                        break;
+                    case SDLK_LEFT:
+                        m_colormap_chain.back();
+                        break;
+                    case SDLK_DOWN:
+                        m_colormap_chain.prev_chain();
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -90,7 +105,7 @@ void Window::run() {
         }
 
         if (update_colormap_data) {
-            upload_colormap_to_storage_buffer(storage_buffer, m_device, m_colormap_chain);
+            upload_colormap_to_storage_buffer(storage_buffer, m_device, m_colormap_chain.get());
         }
 
         push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
