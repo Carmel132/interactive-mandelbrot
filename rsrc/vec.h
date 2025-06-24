@@ -62,3 +62,8 @@ template <typename T>
 inline Vec2<T> lerp(long double t, const Vec2<T>& v1, const Vec2<T>& v2) {
     return v1 * (1-t) + v2*t;
 }
+
+template <typename T>
+inline Vec2<T> exp_interp(long double t, long double smoothing_factor, const Vec2<T>& v1, const Vec2<T>& v2) {
+    return v1 + (v2 - v1) * (1 - std::exp(-t * smoothing_factor));
+}

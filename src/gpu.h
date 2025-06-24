@@ -230,3 +230,25 @@ inline void end_render_pass(SDL_GPUCommandBuffer* cmd_buf, SDL_GPURenderPass* re
     SDL_EndGPURenderPass(render_pass);
     SDL_SubmitGPUCommandBuffer(cmd_buf);
 }
+
+inline void copy_texture_to_window(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUTexture* source, const Vec2<int>& window_size) {
+    SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUTexture* dest_texture = get_swapchain_texture(cmd_buf, window);
+
+    SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(cmd_buf);
+
+    SDL_GPUTextureLocation source_location = {
+        .texture = source,
+        .layer = 0
+    };
+
+    SDL_GPUTextureLocation dest_location = {
+        .texture = dest_texture,
+        .layer = 0
+    };
+
+    SDL_CopyGPUTextureToTexture(copy_pass, &source_location, &dest_location, window_size.x, window_size.y, 1, false);
+
+    SDL_EndGPUCopyPass(copy_pass);
+    SDL_SubmitGPUCommandBuffer(cmd_buf);
+}
