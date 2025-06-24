@@ -15,9 +15,11 @@ struct Window {
     Vec2<float> m_mouse_pos;
     Pan m_pan;
     
-    bool update_colormap_data;
+    bool m_update_colormap_data;
     ColormapChainChain m_colormap_chain;
     
+    bool m_update_screen_data;
+    SDL_GPUTexture* m_render_target_texture = nullptr;
 
     void start();
     void init();
@@ -25,6 +27,6 @@ struct Window {
 
     void poll_window_coordinates();
 
-    Window() : m_view{4.3, 9.0/16.0, {-2.4, 1.2}}, m_pan{&m_mouse_pos, &m_view, &m_window_size}, update_colormap_data{false},  m_colormap_chain{buildColormapChain(&update_colormap_data)} {};
+    Window() : m_view{4.3, 9.0/16.0, {-2.4, 1.2}, &m_update_screen_data}, m_pan{&m_mouse_pos, &m_view, &m_window_size, &m_update_screen_data}, m_update_colormap_data{false},  m_colormap_chain{buildColormapChain(&m_update_colormap_data)}, m_update_screen_data{true} {};
     ~Window() = default;
 };

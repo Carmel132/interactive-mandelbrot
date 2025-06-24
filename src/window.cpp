@@ -29,6 +29,18 @@ void Window::init() {
     if (!SDL_ClaimWindowForGPUDevice(m_device, m_win)) {
         throw SDLException("Failed to bind GPU device to window");
     }
+
+
+    SDL_GPUTextureCreateInfo texture_create_info = {
+        .type = SDL_GPU_TEXTURETYPE_2D,
+        .format = SDL_GetGPUSwapchainTextureFormat(m_device, m_win),
+        .usage = SDL_GPU_TEXTUREUSAGE_COLOR_TARGET,
+        .width = (Uint32)m_window_size.x,
+        .height = (Uint32)m_window_size.y,
+        .layer_count_or_depth = 2,
+        .num_levels = 1
+    };
+    m_render_target_texture = SDL_CreateGPUTexture(m_device, &texture_create_info);
 }
 
 void Window::poll_window_coordinates(){
@@ -97,34 +109,38 @@ void Window::run() {
 
         m_pan.frame();
 
-        SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(m_device);
-
-        if (cmd_buf == nullptr) {
-            throw SDLException("Failed to acquire command buffer");
-            break;
-        }
-
-        if (update_colormap_data) {
+        
+        if (m_update_colormap_data) {
             upload_colormap_to_storage_buffer(storage_buffer, m_device, m_colormap_chain.get());
-            update_colormap_data = false;
+            m_update_colormap_data = false;
+            m_update_screen_data = true;
         }
+        if (m_update_screen_data) {
+            SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(m_device);
 
-        push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
+            if (cmd_buf == nullptr) {
+                throw SDLException("Failed to acquire command buffer");
+                break;
+            }
 
-        SDL_GPURenderPass* render_pass = start_render_pass(cmd_buf, get_swapchain_texture(cmd_buf, m_win));
+            push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
 
-        SDL_BindGPUFragmentStorageBuffers(render_pass, 0, &storage_buffer, 1);
+            SDL_GPURenderPass* render_pass = start_render_pass(cmd_buf, m_render_target_texture);
 
-        SDL_BindGPUGraphicsPipeline(render_pass, pipeline.pipeline);
+            SDL_BindGPUFragmentStorageBuffers(render_pass, 0, &storage_buffer, 1);
 
-        end_render_pass(cmd_buf, render_pass);
+            SDL_BindGPUGraphicsPipeline(render_pass, pipeline.pipeline);
 
-
+            end_render_pass(cmd_buf, render_pass);
+            
+            m_update_screen_data = false;
+        }
+        copy_texture_to_window(m_device, m_win, m_render_target_texture, m_window_size);
     }
 
     pipeline.free(m_device);
     SDL_ReleaseGPUBuffer(m_device, storage_buffer);
-
+    SDL_ReleaseGPUTexture(m_device, m_render_target_texture);
     SDL_ReleaseWindowFromGPUDevice(m_device, m_win);
     SDL_DestroyWindow(m_win);
     SDL_DestroyGPUDevice(m_device);
