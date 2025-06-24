@@ -19,7 +19,7 @@ struct Window {
     ColormapChainChain m_colormap_chain;
     
     bool m_update_screen_data;
-    SDL_GPUTexture* m_render_target_texture;
+    SDL_GPUTexture* m_render_target_texture = nullptr;
 
     void start();
     void init();

@@ -110,34 +110,32 @@ void Window::run() {
         m_pan.frame();
 
         
-
         if (m_update_colormap_data) {
             upload_colormap_to_storage_buffer(storage_buffer, m_device, m_colormap_chain.get());
             m_update_colormap_data = false;
             m_update_screen_data = true;
         }
         if (m_update_screen_data) {
-        SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(m_device);
+            SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(m_device);
 
-        if (cmd_buf == nullptr) {
-            throw SDLException("Failed to acquire command buffer");
-            break;
-        }
+            if (cmd_buf == nullptr) {
+                throw SDLException("Failed to acquire command buffer");
+                break;
+            }
 
-        push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
+            push_fragment_shader_uniforms(cmd_buf, m_window_size.x, m_window_size.y, m_view);
 
-        SDL_GPURenderPass* render_pass = start_render_pass(cmd_buf, m_render_target_texture);
+            SDL_GPURenderPass* render_pass = start_render_pass(cmd_buf, m_render_target_texture);
 
-        SDL_BindGPUFragmentStorageBuffers(render_pass, 0, &storage_buffer, 1);
+            SDL_BindGPUFragmentStorageBuffers(render_pass, 0, &storage_buffer, 1);
 
-        SDL_BindGPUGraphicsPipeline(render_pass, pipeline.pipeline);
+            SDL_BindGPUGraphicsPipeline(render_pass, pipeline.pipeline);
 
-        end_render_pass(cmd_buf, render_pass);
-        m_update_screen_data = false;
+            end_render_pass(cmd_buf, render_pass);
+            
+            m_update_screen_data = false;
         }
         copy_texture_to_window(m_device, m_win, m_render_target_texture, m_window_size);
-
-        
     }
 
     pipeline.free(m_device);

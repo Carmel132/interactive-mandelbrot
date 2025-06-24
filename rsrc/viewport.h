@@ -22,12 +22,8 @@ struct Viewport {
         return m_offset + Vec2<long double>{ret_width, ret_height};
     }
 
-    // inline Vec2<int> toScreenCoord(const Vec2<long double>& p, int w, int h) const {
-
-    // }
-
     inline void zoomAboutPoint(Vec2<long double> point, bool zoom_in) {
-        double factor = zoom_in ? 1-ZOOM_RATE : 1+ZOOM_RATE;
+        double factor = 1 + (zoom_in ? -ZOOM_RATE : ZOOM_RATE);
 
         m_width *= factor;
         m_offset = point + (m_offset - point) * factor;
@@ -37,8 +33,6 @@ struct Viewport {
  };
 
 struct Pan {
-    
-
     Vec2<float>* mouse_pos;
     Viewport* view;
     Vec2<int>* window_size;
@@ -52,7 +46,6 @@ struct Pan {
         holding_click = true;
         anchor = view->fromScreenCoord(mouse_pos->x, mouse_pos->y, window_size->x, window_size->y);
         stored_offset = view->m_offset + anchor;
-        //target_offset = view->m_offset;
     }
 
     void on_mouse_motion() {
@@ -87,7 +80,4 @@ struct Pan {
         holding_click = false;
         target_offset = view->m_offset;
     }
-
-
-
 };
