@@ -31,6 +31,16 @@ vec3 fromColormap(int i) {
     return colors.colors[idx];
 }
 
+int iter_check(dvec2 point) {
+    dvec2 z = point;
+    int i;
+    for(i = 0; i < ITER_COUNT; ++i) {
+        if (dot(z, z) >= BREAKOUT * BREAKOUT) break;
+        z = dvec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + point;
+    }
+    return i;
+}
+
 void main() {
     vec3 color;
     dvec2 pos = gl_FragCoord.xy;
@@ -38,12 +48,27 @@ void main() {
         pos.x / uResolution.u_resolution.x * view.width + view.offset.x,
         pos.y / uResolution.u_resolution.y * view.width * view.ratio - view.offset.y
     );
-    dvec2 z = point;
     int i;
-    for(i = 0; i < ITER_COUNT; ++i) {
-        if (dot(z, z) >= BREAKOUT * BREAKOUT) break;
-        z = dvec2(z.x*z.x - z.y*z.y, 2.0*z.x*z.y) + point;
+    
+    double q = (point.x - 0.25)*(point.x-0.25) + point.y * point.y;
+    
+    if (point.x * point.x + point.y * point.y > 4) {
+        i = 0;
     }
+    // Cardioid check
+    else if (q*(q+(point.x-0.25)) < 0.25 * point.y * point.y) {
+        i = ITER_COUNT;
+    }
+    // Bulb check
+    else if ((point.x + 1)*(point.x + 1) + point.y * point.y < 0.0625) {
+        i = ITER_COUNT;
+    }
+    // Iteration check
+    else {
+        i = iter_check(point);
+    }
+
+    
     float t = float(i) / float(ITER_COUNT);
     color = colors.colors[int(t * 255)];
     FragColor = vec4(color.xyz, 1);//vec4(t, t*t, t*t*t, 1.0);

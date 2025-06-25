@@ -104,6 +104,7 @@ void Window::run() {
                     default:
                         break;
                 }
+                
             }
         }
 

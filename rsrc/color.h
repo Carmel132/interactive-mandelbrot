@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <rsrc/colormaps.h>
+#include <array>
+#include <string>
 
 #define COLORMAP_SIZE sizeof(magma)
 #define COLORMAP_CHAIN_SET_SIZE 7
@@ -48,12 +50,12 @@ constexpr ColormapChain colormap_chain_perceptually_uniform_sequential {
     }
 };
 
-constexpr const _NormalizedColorF* colormap_sequential[23] = {
-    greys, purples, blues, greens, oranges, reds, ylorbr, ylorrd, purd, rdpu, bupu, ylorbr, ylorrd, orrd, purd, rdpu, bupu, gnbu, pubu, ylgnbu, pubugn, bugn, ylgn
+constexpr const _NormalizedColorF* colormap_sequential[18] = {
+    greys, purples, blues, greens, oranges, reds, ylorbr, ylorrd, orrd, purd, rdpu, bupu, gnbu, pubu, ylgnbu, pubugn, bugn, ylgn
 };
 constexpr ColormapChain colormap_chain_sequential {
     .set = {
-        .size = 23,
+        .size = 18,
         .set = colormap_sequential
     }
 };
@@ -88,12 +90,12 @@ constexpr ColormapChain colormap_chain_cyclic {
     }
 };
 
-constexpr const _NormalizedColorF* colormap_qualitative[11] = {
-    pastel1, pastel2, paired, accent, set1, set2, set3, tab10, tab20, tab20b, tab20c
+constexpr const _NormalizedColorF* colormap_qualitative[12] = {
+    pastel1, pastel2, paired, accent, dark2 ,set1, set2, set3, tab10, tab20, tab20b, tab20c
 };
 constexpr ColormapChain colormap_chain_qualitative {
     .set = {
-        .size = 11,
+        .size = 12,
         .set = colormap_qualitative
     }
 };
@@ -136,7 +138,7 @@ struct ColormapChainChain {
         set.chains[idx].back(update_colomap_chain);
     }
 
-    ColormapChain get() {
+    ColormapChain get() const {
         return set.chains[idx];
     }
 };
@@ -160,4 +162,35 @@ inline ColormapChainChain buildColormapChain(bool* update_colomap_chain) {
             .chains = colormap_chains
         }
     };
+};
+
+class ColormapChainNames {
+public:
+    static inline const std::array<const std::vector<std::string>, COLORMAP_CHAIN_SET_SIZE> colormap_chain_set_names {
+        std::vector<std::string>{"Viridis", "Plasma", "Inferno", "Magma", "Cividis"},
+        std::vector<std::string>{"Greys", "Purples", "Blues", "Greens", "Oranges", "Reds", "YlOrBr", "YlOrRd", "OrRd", "PuRd", "RdPu", "BuPu", "GnBu", "PuBu", "YlGnBu", "PuBuGn", "BuGn", "YlGn"},
+        std::vector<std::string>{"Binary", "Gist_Yarg", "Gist_Gray", "Gray", "Bone", "Pink", "Spring", "Summer", "Autumn", "Winter", "Cool", "Wistia", "Hot", "Afmhot", "Gist_Heat", "Copper"},
+        std::vector<std::string>{"PiYG", "PRGn", "BrBG", "PuOr", "RdGy", "RdBu", "RdYlBy", "RdYlGn", "Spectral", "Cool Warm", "Bwr", "Seismic"},
+        std::vector<std::string>{"Twilight", "Twilight Shifted", "HSV"},
+        std::vector<std::string>{"Pastel 1", "Pastel 2", "Paired", "Accent", "Dark 2", "Set 1", "Set 2", "Set 3", "Tab 10", "Tab 20", "Tab 20B", "Tab 20C"},
+        std::vector<std::string>{"Flag", "Prism", "Ocean", "Gist_Earth", "Terrain", "Gist_Stern", "GnuPlot", "GnuPlot 2", "CMRmap", "CubeHelix", "Brg", "Gist_Rainbow", "Rainbow", "Jet", "Turbo", "Nipy_Spectral", "Gist_Ncar"}
+    };
+
+    static inline const std::array<std::string, COLORMAP_CHAIN_SET_SIZE> colormap_chain_names {
+        "Perceptually Uniform Sequential",
+        "Sequential",
+        "Sequential 2",
+        "Diverging",
+        "Cyclic",
+        "Qualitative",
+        "Miscellaneous"
+    };
+
+    static inline const std::string& get_colormap(const ColormapChainChain& chain) {
+        return colormap_chain_set_names[chain.idx][chain.get().idx];
+    }
+
+    static inline const std::string& get_colorchain(const ColormapChainChain& chain) {
+        return colormap_chain_names[chain.idx];
+    }
 };
