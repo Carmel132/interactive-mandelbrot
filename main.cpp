@@ -1,9 +1,8 @@
-
 #include <src/window.h>
-#include <limits>
-auto main(int argc, char** argv) -> int {
-    Window w{};
 
-    w.run();
+auto main(int argc, char** argv) -> int {
+    Window window{};
+
+    window.run();
     return 0;
 }

@@ -143,6 +143,9 @@ struct ColormapChainChain {
     }
 };
 
+/// @brief Builds and returns a `ColormapChainChain` object
+/// @param update_colomap_chain A bool pointer that gets set to `true` whenever the colormap is updated
+/// @return `ColormapChainChain` object
 inline ColormapChainChain buildColormapChain(bool* update_colomap_chain) {
     static ColormapChain colormap_chains[COLORMAP_CHAIN_SET_SIZE] = {
         colormap_chain_perceptually_uniform_sequential,

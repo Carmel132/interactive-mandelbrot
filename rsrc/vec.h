@@ -5,6 +5,8 @@
 template <typename T> 
 concept _Number = std::floating_point<T> or std::integral<T>;
 
+/// @brief Holds 2D numerical data
+/// @tparam T Number type
 template<typename T> requires _Number<T>
 struct Vec2 {
     T x, y;
@@ -58,11 +60,25 @@ struct Vec2 {
     }
 };
 
+
+/// @brief Linearly interpolates between two vectors
+/// @tparam T Number type
+/// @param t Interpolation variable
+/// @param v1 Start vector
+/// @param v2 End vector 
+/// @return Linearly interpolated vector
 template <typename T>
 inline Vec2<T> lerp(long double t, const Vec2<T>& v1, const Vec2<T>& v2) {
     return v1 * (1-t) + v2*t;
 }
 
+/// @brief Exponentially interpolated between two vectors
+/// @tparam T Number type
+/// @param t Interpolation variable
+/// @param smoothing_factor How gradual the change is between the vectors
+/// @param v1 Start vector
+/// @param v2 End vector
+/// @return Exponentially interpolated vector
 template <typename T>
 inline Vec2<T> exp_interp(long double t, long double smoothing_factor, const Vec2<T>& v1, const Vec2<T>& v2) {
     return v1 + (v2 - v1) * (1 - std::exp(-t * smoothing_factor));

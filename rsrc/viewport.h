@@ -5,23 +5,33 @@
 #define PAN_RATE 0.1
 #define PAN_CUTOFF_THRESHOLD_PIXELS 5
 #define PAN_SMOOTH_FACTOR 5
-// Stores coordinate box thats maintains proportion
+
+/// @brief Stores coordinate box thats maintains proportion
 struct Viewport {
     // the width of the box
     long double m_width;
-    // the ration of height to width
+    // the ratio of height to width
     long double m_ratio;
-    // offset in absolute coordinates
+    // offset in relative coordinates
     Vec2<long double> m_offset;
     
     bool* m_update_screen;
 
+    /// @brief Converts absolute coordinates (pixels) to relative coordinates
+    /// @param x x coordinate
+    /// @param y y coordinate
+    /// @param w Width of absolute rect
+    /// @param h Height of absolute rect
+    /// @return Given point in relative coordinates
     inline Vec2<long double> fromScreenCoord(int x, int y, int w, int h) const {
         long double ret_width = m_width * (long double)x / w;
         long double ret_height = -(m_width * m_ratio) * (long double)y / h;
         return m_offset + Vec2<long double>{ret_width, ret_height};
     }
 
+    /// @brief Zooms viewport about point
+    /// @param point The point to zoom about in relative coordinates.
+    /// @param zoom_in Whether the to zoom in, out otherwise
     inline void zoomAboutPoint(Vec2<long double> point, bool zoom_in) {
         double factor = 1 + (zoom_in ? -ZOOM_RATE : ZOOM_RATE);
 
@@ -32,6 +42,7 @@ struct Viewport {
     }
  };
 
+/// @brief Provides panning functionality to `Viewport`
 struct Pan {
     Vec2<float>* mouse_pos;
     Viewport* view;
@@ -42,12 +53,15 @@ struct Pan {
     Vec2<long double> target_offset{view->m_offset};
 
     bool holding_click {false};
+
+    /// @brief Called whenever the mouse is pressed
     void on_mouse_down() {
         holding_click = true;
         anchor = view->fromScreenCoord(mouse_pos->x, mouse_pos->y, window_size->x, window_size->y);
         stored_offset = view->m_offset + anchor;
     }
 
+    /// @brief Called whenever the mouse is moved
     void on_mouse_motion() {
         if (!holding_click) {return;}
 
@@ -55,10 +69,12 @@ struct Pan {
         target_offset = stored_offset - offset_change;
     }
 
+    /// @brief Called whenever the mouse is released
     void on_mouse_up() {
         holding_click = false;
     }
 
+    /// @brief Called on each frame
     void frame() {
         Vec2 diff = view->m_offset - target_offset;
         long double diff_length_sqrd = diff*diff;
@@ -76,6 +92,7 @@ struct Pan {
         }
     }
 
+    /// @brief This should be called in conjunction with `view->zoomAboutPoint`
     void on_zoom() {
         holding_click = false;
         target_offset = view->m_offset;

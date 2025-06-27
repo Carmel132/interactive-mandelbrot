@@ -58,9 +58,9 @@ Uint32 storage_texture_count) -> SDL_GPUShader* {
 }
 
 
-// encapsulates the vertex and fragment shaders
-// Vertex shader has 0 inputs
-// Fragment shader has 2 uniforms and 1 storage buffer
+/// @brief encapsulates the vertex and fragment shaders.
+/// Vertex shader has 0 inputs.
+/// Fragment shader has 2 uniforms and 1 storage buffer
 struct Shaders {
     SDL_GPUShader* m_shader_vertex,* m_shader_fragment;
     Shaders(SDL_GPUDevice* device) : 
@@ -69,7 +69,6 @@ struct Shaders {
         if (m_shader_vertex == nullptr) {
             throw SDLException("failed to create vertex shader");
         }
-
         if (m_shader_fragment == nullptr) {
             throw SDLException("failed to create fragment shader");
         }
@@ -82,7 +81,7 @@ struct Shaders {
     }
 };
 
-// encapsulates the graphics pipeline
+/// @brief Encapsulates the graphics pipeline
 struct Pipeline {
     SDL_GPUGraphicsPipeline* pipeline;
     Pipeline(SDL_GPUDevice* device, const Shaders& shaders, SDL_GPUTextureFormat format) {
@@ -110,11 +109,12 @@ struct Pipeline {
     void free(SDL_GPUDevice* device) const {
         SDL_ReleaseGPUGraphicsPipeline(device, pipeline);
     }
-
 };
 
-
-// Sends colormap chain data to given storage buffer through a copy pass.
+/// @brief Sends colormap chain data to given storage buffer through a copy pass
+/// @param storage_buffer The buffer to write into
+/// @param device GPU instance
+/// @param colormap_chain Colormap data
 inline void upload_colormap_to_storage_buffer(SDL_GPUBuffer* storage_buffer, SDL_GPUDevice* device, const ColormapChain& colormap_chain) {
     using _PaddedVec3 = _NormalizedColorF;
 
@@ -152,9 +152,11 @@ inline void upload_colormap_to_storage_buffer(SDL_GPUBuffer* storage_buffer, SDL
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
 }
 
-// creates a [SDL_GPUBuffer*] pointing to the storage buffer
-// performs a copy pass and uploads colormap data to the fragment storage buffer
-// this needs to be bound to the command buffer BEFORE each draw call
+/// @brief performs a copy pass and uploads colormap data to the fragment storage buffer
+/// @param device GPU instance
+/// @param colormap_chain Colormap data
+/// @return a `SDL_GPUBuffer*` pointing to the storage buffer
+/// @warning The buffer needs to be bound to the command buffer \b BEFORE each draw call
 inline auto create_and_upload_to_fragment_storage_buffer(SDL_GPUDevice* device, const ColormapChain& colormap_chain) -> SDL_GPUBuffer* {
     using _PaddedVec3 = _NormalizedColorF;
 
@@ -170,7 +172,11 @@ inline auto create_and_upload_to_fragment_storage_buffer(SDL_GPUDevice* device, 
     return storage_buffer;
 }
 
-// formats and uploads uniform data to fragment shader
+/// @brief formats and uploads uniform data to fragment shader
+/// @param cmd_buf The currently acquired command buffer
+/// @param window_width Width of the window in pixels
+/// @param window_height Height of the window in pixels
+/// @param view Viewport object
 inline void push_fragment_shader_uniforms(SDL_GPUCommandBuffer* cmd_buf, int window_width, int window_height, const Viewport& view) {
     struct _Vec2 {
         float x, y;
@@ -197,7 +203,10 @@ inline void push_fragment_shader_uniforms(SDL_GPUCommandBuffer* cmd_buf, int win
     SDL_PushGPUFragmentUniformData(cmd_buf, 1, &window_size, sizeof(window_size));
 }
 
-// Waits for swapchain texture. Will submit command buffer if NULL and throws an SDLException
+/// @brief Waits for swapchain texture. Will submit command buffer if NULL and throws an SDLException
+/// @param cmd_buf The currently acquired command buffer
+/// @param window Window instance
+/// @return The current swapchain texture
 inline auto get_swapchain_texture(SDL_GPUCommandBuffer* cmd_buf, SDL_Window* window) -> SDL_GPUTexture* {
     SDL_GPUTexture* swapchain_texture;
     if (!SDL_WaitAndAcquireGPUSwapchainTexture(cmd_buf, window, &swapchain_texture, nullptr, nullptr)) {
@@ -212,6 +221,10 @@ inline auto get_swapchain_texture(SDL_GPUCommandBuffer* cmd_buf, SDL_Window* win
     return swapchain_texture;
 }
 
+/// @brief Begins a render pass
+/// @param cmd_buf The currently acquired command buffer
+/// @param swapchain_texture The current swapchain texture
+/// @return A renderpass handle
 inline auto start_render_pass(SDL_GPUCommandBuffer* cmd_buf, SDL_GPUTexture* swapchain_texture) -> SDL_GPURenderPass* {
     SDL_GPUColorTargetInfo color_target_info = {
         .texture = swapchain_texture,
@@ -225,12 +238,20 @@ inline auto start_render_pass(SDL_GPUCommandBuffer* cmd_buf, SDL_GPUTexture* swa
     return render_pass;
 }
 
+/// @brief Terminates a render pass
+/// @param cmd_buf The currently acquired command buffer
+/// @param render_pass The render pass handle
 inline void end_render_pass(SDL_GPUCommandBuffer* cmd_buf, SDL_GPURenderPass* render_pass) {
     SDL_DrawGPUPrimitives(render_pass, 3, 1, 0, 0);
     SDL_EndGPURenderPass(render_pass);
     SDL_SubmitGPUCommandBuffer(cmd_buf);
 }
 
+/// @brief Renders a given texture to the screen
+/// @param device GPU instance
+/// @param window Window instance
+/// @param source The texture to render 
+/// @param window_size Screen dimensions
 inline void copy_texture_to_window(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUTexture* source, const Vec2<int>& window_size) {
     SDL_GPUCommandBuffer* cmd_buf = SDL_AcquireGPUCommandBuffer(device);
     SDL_GPUTexture* dest_texture = get_swapchain_texture(cmd_buf, window);

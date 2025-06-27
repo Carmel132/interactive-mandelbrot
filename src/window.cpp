@@ -1,9 +1,5 @@
 #include <window.h>
 
-void Window::start() {
-
-}
-
 void Window::init() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cout << "SDL failed to initialize\n" << SDL_GetError() << "\n";
@@ -15,7 +11,7 @@ void Window::init() {
         throw SDLException("Failed to create window");
     }
 
-    poll_window_coordinates();
+    poll_window_size();
     SDL_GetMouseState(&m_mouse_pos.x, &m_mouse_pos.y);
 
     m_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
@@ -43,12 +39,12 @@ void Window::init() {
     m_render_target_texture = SDL_CreateGPUTexture(m_device, &texture_create_info);
 }
 
-void Window::poll_window_coordinates(){
+void Window::poll_window_size(){
     SDL_GetWindowSize(m_win, &m_window_size.x, &m_window_size.y);
 }
 
 void Window::run() {
-    // ensures [init()] has been called
+    // ensures `init()` has been called
     if (m_win == nullptr) {init();}
 
     Shaders shaders{m_device};
@@ -73,7 +69,7 @@ void Window::run() {
                 m_pan.on_zoom();
             }
             else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-                poll_window_coordinates();
+                poll_window_size();
             }
             else if (event.type == SDL_EVENT_MOUSE_MOTION) {
                 m_mouse_pos.x = event.motion.x;
@@ -104,12 +100,10 @@ void Window::run() {
                     default:
                         break;
                 }
-                
             }
         }
 
         m_pan.frame();
-
         
         if (m_update_colormap_data) {
             upload_colormap_to_storage_buffer(storage_buffer, m_device, m_colormap_chain.get());
