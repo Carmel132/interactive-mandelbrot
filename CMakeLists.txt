@@ -4,7 +4,7 @@ set(CMAKE_TOOLCHAIN_FILE "C:/Users/User/vcpkg/scripts/buildsystems/vcpkg.cmake"
 project (main VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+add_definitions(-DSDL_MAIN_HANDLED)
 find_package(SDL3 CONFIG REQUIRED)
 
 file(GLOB SOURCES 
@@ -26,4 +26,6 @@ target_include_directories(main
 		${PROJECT_SOURCE_DIR}
 )
 
-
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    WIN32_EXECUTABLE TRUE
+)
